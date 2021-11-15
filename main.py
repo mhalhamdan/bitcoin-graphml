@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 from sklearn import metrics
 
@@ -29,6 +30,7 @@ def predict(model, xTrain, yTrain, xTest, yTest):
     return trainAcc, trainAuc, testAcc, testAuc
 
 def train(xTrain, yTrain, model_name="knn", grid_search=False):
+    print("Training for: ", model_name)
     model = None # Actual model to return
 
     # K-nearest neighbors
@@ -44,7 +46,18 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
         
     # Decision tree
     elif model_name == "dt":
-        pass
+        if grid_search:
+            parameters = {"max_depth":[1,3,5,7,9,11], 'min_samples_leaf':[50,100,150,200,250,300], "criterion":['gini', 'entropy']}
+            model = GridSearchCV(
+                DecisionTreeClassifier(), 
+                parameters
+            )
+            print("DecisionTree best params: ", model.best_params_)
+        else:
+            model = DecisionTreeClassifier()
+
+        model.fit(xTrain, yTrain['class'])
+
 
     # Gradient Descent Boosted Decision Tree (GDBDT)
     elif model_name == "GDBDT":
@@ -61,13 +74,14 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
 
 def main():
     # Read data
+    print("Reading data...")
     y = pd.read_csv("filtered_classes.csv")
     xFeat = pd.read_csv("filtered_features.csv")
     # Split data, train = 70%, test 30%
     xTrain, xTest, yTrain, yTest = holdout(xFeat, y, 0.7)
 
     # Initialize and train model
-    model = train(xTrain, yTrain, "knn", grid_search=True)
+    model = train(xTrain, yTrain, "dt", grid_search=False)
 
     # Predict
     trainAcc, trainAuc, testAcc, testAuc = predict(model, xTrain, yTrain, xTest, yTest)

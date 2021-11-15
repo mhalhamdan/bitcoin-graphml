@@ -1,3 +1,4 @@
+print("Importing...")
 from preprocessing import holdout
 import pandas as pd
 import numpy as np
@@ -99,14 +100,17 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
 
 def main():
     # Read data
+    print("Reading data...")
     y = pd.read_csv("filtered_classes.csv")
     xFeat = pd.read_csv("filtered_features.csv")
     # Split data, train = 70%, test 30%
     xTrain, xTest, yTrain, yTest = holdout(xFeat, y, 0.7)
 
     # Initialize and train model
-    model = train(xTrain, yTrain, "knn", grid_search=False)
+    print("Training model...")
+    model = train(xTrain, yTrain, "dt", grid_search=False)
 
+    print("Predicting...")
     results = predict(model, xTrain, yTrain, xTest, yTest)
 
     for key, value in results.items():

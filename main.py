@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 from sklearn import metrics
 
@@ -72,7 +73,17 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
         
     # Decision tree
     elif model_name == "dt":
-        pass
+        if grid_search:
+            parameters = {"max_depth":[1,3,5,7,9,11], 'min_samples_leaf':[50,100,150,200,250,300], "criterion":['gini', 'entropy']}
+            model = GridSearchCV(
+                DecisionTreeClassifier(), 
+                parameters
+            )
+            print("DecisionTree best params: ", model.best_params_)
+        else:
+            model = DecisionTreeClassifier()
+
+        model.fit(xTrain, yTrain['class'])
 
     # Gradient Descent Boosted Decision Tree (GDBDT)
     elif model_name == "GDBDT":

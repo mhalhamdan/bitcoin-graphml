@@ -1,0 +1,12 @@
+train_(tn, fp, fn, tp) : [29368     0  1917  1310]
+test_(tn, fp, fn, tp) : [12595    56   806   512]
+
+
+TN = True Negative = Licit transaction classified as Licit
+
+FP = False Positive = Illicit transaction classified as Licit
+
+FN = False Negative = Licit transaction classified as Illicit
+
+TP = True Positive = Illicit transaction classified as Illicit
+

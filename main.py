@@ -1,38 +1,62 @@
-
-print("Importing...")
 from preprocessing import holdout
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
 
 from sklearn import metrics
 
-def predict(model, xTrain, yTrain, xTest, yTest):
-    # Accuracy
-    yHatTrain = model.predict(xTrain)
-    trainAcc = metrics.accuracy_score(yTrain['class'], yHatTrain)
 
+def predict(model, xTrain, yTrain, xTest, yTest):
+    # Test
+    # Accuracy
     yHatTest = model.predict(xTest)
     testAcc = metrics.accuracy_score(yTest['class'], yHatTest)
 
     # predict training and testing probabilties
-    yHatTrain = model.predict_proba(xTrain)
     yHatTest = model.predict_proba(xTest)
-    # calculate auc for training
-    fpr, tpr, thresholds = metrics.roc_curve(yTrain['class'],
-                                             yHatTrain[:, 1])
-    trainAuc = metrics.auc(fpr, tpr)
     # calculate auc for test dataset
     fpr, tpr, thresholds = metrics.roc_curve(yTest['class'],
-                                             yHatTest[:, 1])
+                                            yHatTest[:, 1])
     testAuc = metrics.auc(fpr, tpr)
 
-    return trainAcc, trainAuc, testAcc, testAuc
+    test_precision = metrics.precision_score(yTest['class'], yHatTest[:,1].astype(int)) 
+    test_recall = metrics.recall_score(yTest['class'], yHatTest[:,1].astype(int))
+    test_matrix = metrics.confusion_matrix(yTest['class'], yHatTest[:,1].astype(int)).ravel()
+
+    # Train
+    # Accuracy
+    yHatTrain = model.predict(xTrain)
+    trainAcc = metrics.accuracy_score(yTrain['class'], yHatTrain)
+
+    # predict training and testing probabilties
+    yHatTrain = model.predict_proba(xTrain)
+    # calculate auc for training
+    fpr, tpr, thresholds = metrics.roc_curve(yTrain['class'],
+                                            yHatTrain[:, 1])
+    trainAuc = metrics.auc(fpr, tpr)
+
+    train_precision = metrics.precision_score(yTrain['class'], yHatTrain[:,1].astype(int))
+    train_recall = metrics.recall_score(yTrain['class'], yHatTrain[:,1].astype(int))
+    train_matrix = metrics.confusion_matrix(yTrain['class'], yHatTrain[:,1].astype(int)).ravel()
+
+    result_metrics = {
+        "trainAcc": trainAcc, 
+        "trainAuc": trainAuc, 
+        "testAcc": testAcc, 
+        "testAuc": testAuc,
+        "train_precision": train_precision,
+        "test_precision": test_precision,
+        "train_recall": train_recall,
+        "test_recall": test_recall,
+        "train_(tn, fp, fn, tp)": train_matrix,
+        "test_(tn, fp, fn, tp)": test_matrix
+        }
+
+    return result_metrics
+
 
 def train(xTrain, yTrain, model_name="knn", grid_search=False):
-    print("Training for: ", model_name)
     model = None # Actual model to return
 
     # K-nearest neighbors
@@ -48,18 +72,7 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
         
     # Decision tree
     elif model_name == "dt":
-        if grid_search:
-            parameters = {"max_depth":[1,3,5,7,9,11], 'min_samples_leaf':[50,100,150,200,250,300], "criterion":['gini', 'entropy']}
-            model = GridSearchCV(
-                DecisionTreeClassifier(), 
-                parameters
-            )
-            print("DecisionTree best params: ", model.best_params_)
-        else:
-            model = DecisionTreeClassifier()
-
-        model.fit(xTrain, yTrain['class'])
-
+        pass
 
     # Gradient Descent Boosted Decision Tree (GDBDT)
     elif model_name == "GDBDT":
@@ -73,28 +86,20 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
     return model
 
 
-
 def main():
     # Read data
-    print("Reading data...")
     y = pd.read_csv("filtered_classes.csv")
     xFeat = pd.read_csv("filtered_features.csv")
     # Split data, train = 70%, test 30%
     xTrain, xTest, yTrain, yTest = holdout(xFeat, y, 0.7)
 
     # Initialize and train model
-    model = train(xTrain, yTrain, "dt", grid_search=False)
+    model = train(xTrain, yTrain, "knn", grid_search=False)
 
-    # Predict
-    trainAcc, trainAuc, testAcc, testAuc = predict(model, xTrain, yTrain, xTest, yTest)
-    print("Train accuracy: ", trainAcc)
-    print("Test accuracy: ", testAcc)
-    print("Train AUC: ", trainAuc)
-    print("Test AUC: ", testAuc)
+    results = predict(model, xTrain, yTrain, xTest, yTest)
 
-
-    
-
+    for key, value in results.items():
+        print(f"{key} : {value}")
 
 
 if __name__ == "__main__":

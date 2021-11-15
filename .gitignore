@@ -1,0 +1,5 @@
+elliptic_bitcoin_dataset/elliptic_txs_classes.csv
+filtered_classes.csv
+filtered_features.csv
+elliptic_bitcoin_dataset/elliptic_txs_edgelist.csv
+elliptic_bitcoin_dataset/elliptic_txs_features.csv

@@ -1,3 +1,5 @@
+
+print("Importing...")
 from preprocessing import holdout
 import pandas as pd
 import numpy as np

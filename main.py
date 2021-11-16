@@ -80,11 +80,12 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
                 DecisionTreeClassifier(), 
                 parameters
             )
-            print("DecisionTree best params: ", model.best_params_)
+            
         else:
             model = DecisionTreeClassifier()
 
         model.fit(xTrain, yTrain['class'])
+        print("DecisionTree best params: ", model.best_params_)
 
     # Gradient Descent Boosted Decision Tree (GDBDT)
     elif model_name == "GDBDT":
@@ -99,6 +100,7 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
 
 
 def main():
+    model_name = "dt"
     # Read data
     print("Reading data...")
     y = pd.read_csv("filtered_classes.csv")
@@ -106,9 +108,15 @@ def main():
     # Split data, train = 70%, test 30%
     xTrain, xTest, yTrain, yTest = holdout(xFeat, y, 0.7)
 
+    # # Getting user input
+    # model_name = input("Please enter the model ('knn', 'dt', 'GDBDT', 'GCN')to execute: ")
+    # if model_name not in ["knn", "dt", "GDBDT", "GCN"]:
+    #     print("No model found under: ", model_name)
+    #     exit()
+    # print("Model chosen: ", model_name)
     # Initialize and train model
     print("Training model...")
-    model = train(xTrain, yTrain, "dt", grid_search=False)
+    model = train(xTrain, yTrain, model_name, grid_search=True)
 
     print("Predicting...")
     results = predict(model, xTrain, yTrain, xTest, yTest)

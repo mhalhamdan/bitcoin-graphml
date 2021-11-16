@@ -1,5 +1,39 @@
-train_(tn, fp, fn, tp) : [29368     0  1917  1310]
-test_(tn, fp, fn, tp) : [12595    56   806   512]
+KNN = 5
+trainAcc : 0.9524466942782636
+trainAuc : 0.9790804284093786
+testAcc : 0.9377908225356145
+testAuc : 0.881607275602351
+train_precision : 1.0
+test_precision : 0.8958333333333334
+train_recall : 0.3928237129485179
+test_recall : 0.3529850746268657
+train_(tn, fp, fn, tp) : [29390     0  1946  1259]
+test_(tn, fp, fn, tp) : [12574    55   867   473]
+
+DT
+trainAcc : 1.0
+trainAuc : 1.0
+testAcc : 0.9789533968072159
+testAuc : 0.944675816788028
+train_precision : 1.0
+test_precision : 0.8916083916083916
+train_recall : 1.0
+test_recall : 0.9016973125884017
+train_(tn, fp, fn, tp) : [29464     0     0  3131]
+test_(tn, fp, fn, tp) : [12400   155   139  1275]
+
+DT Best params
+{'criterion': 'entropy', 'max_depth': 11, 'min_samples_leaf': 50}
+trainAcc : 0.9834330418775886
+trainAuc : 0.9937809905011619
+testAcc : 0.9830338606915312
+testAuc : 0.986610620120517
+train_precision : 1.0
+test_precision : 0.9958932238193019
+train_recall : 0.7333127317676144
+test_recall : 0.7410236822001528
+train_(tn, fp, fn, tp) : [29359     0   863  2373]
+test_(tn, fp, fn, tp) : [12656     4   339   970]
 
 
 TN = True Negative = Licit transaction classified as Licit

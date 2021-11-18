@@ -1,6 +1,36 @@
 import numpy as np
 import pandas as pd
 from numpy.random import permutation
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def find_corr(xFeat, y, plot_title=False):
+
+    new_df = pd.concat([xFeat, y], axis=1, join='inner')
+
+    feature_matrix = xFeat.corr(method='pearson')
+    label_matrix = new_df.corr(method='pearson')
+
+    if plot_title:
+        ax = sns.heatmap(label_matrix.abs(), xticklabels=True, yticklabels=True)
+        plt.title(plot_title)
+        plt.show()
+
+    return feature_matrix.abs(), label_matrix.abs()
+
+def get_high_correlation(matrix, THRESHOLD=0.95):
+
+    to_remove = []
+
+    for idx, row in matrix.iterrows():
+        # print(row[1])
+        for col in row.index:
+            # print(row[col])
+            if row[col] > THRESHOLD and idx != col:
+                if col not in to_remove:
+                    to_remove.append(col)
+
+    return to_remove
 
 def prepare_date():
     # Create headers for features file

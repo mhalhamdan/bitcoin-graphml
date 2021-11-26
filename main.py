@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 from sklearn import metrics
 
@@ -92,7 +93,17 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
 
     # Gradient Descent Boosted Decision Tree (GDBDT)
     elif model_name == "GDBDT":
-        pass
+        if grid_search:
+            parameters = {}
+            model = GridSearchCV(
+                GradientBoostingClassifier(), 
+                parameters
+            )
+            
+        else:
+            model = GradientBoostingClassifier()
+
+        model.fit(xTrain, yTrain['class'])
 
     # Graph Convulotional Network (GCN)
     elif model_name == "GCN":
@@ -103,7 +114,8 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
 
 
 def main():
-    model_name = "dt"
+    model_name = "GDBDT"
+    print("Model: ", model_name)
     # Read data
     print("Reading data...")
     y = pd.read_csv("filtered_classes.csv")
@@ -124,7 +136,7 @@ def main():
     # Split data, train = 70%, test 30%
     xTrain, xTest, yTrain, yTest = holdout(xFeat, y, 0.7)
 
-    model_name = "knn"
+    # model_name = "knn"
 
     # Initialize and train model
     model = train(xTrain, yTrain, model_name, grid_search=False)

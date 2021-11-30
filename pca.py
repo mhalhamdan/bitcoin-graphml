@@ -5,7 +5,6 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 def normalize_data(xTrain, xTest):
-    # TODO: normalize the data
     stdScale = StandardScaler()
     stdScale.fit(xTrain)
     trainScaled = stdScale.transform(xTrain)

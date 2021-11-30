@@ -3,6 +3,34 @@ import pandas as pd
 from numpy.random import permutation
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.utils import resample
+
+def upsample_data(X, y):
+
+    df = pd.concat([X, y['class']], axis=1, join='inner')
+
+    print(df.shape)
+
+    df_majority = df[df['class'] == 0]
+    df_minority = df[df['class'] == 1]
+
+    print(df_majority.shape)
+
+    print(df_minority.shape)
+
+    print(df_majority.shape[0])
+
+    # print(df_minority.head())
+    # print(df_majority.head())
+
+    df_minority_upsampled = resample(df_minority, 
+                                     replace=True, 
+                                     n_samples=df_majority.shape[0],
+                                     random_state=123)
+
+    df_upsampled = pd.concat([df_majority, df_minority_upsampled])
+
+    return df_upsampled.drop(['class'], axis=1), df_upsampled[['txId', 'class']]
 
 def find_corr(xFeat, y, plot_title=False):
 
@@ -14,7 +42,7 @@ def find_corr(xFeat, y, plot_title=False):
     if plot_title:
         ax = sns.heatmap(label_matrix.abs(), xticklabels=True, yticklabels=True)
         plt.title(plot_title)
-        plt.show()
+        # plt.show()
 
     return feature_matrix.abs(), label_matrix.abs()
 

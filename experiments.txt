@@ -36,6 +36,19 @@ train_(tn, fp, fn, tp) : [29359     0   863  2373]
 test_(tn, fp, fn, tp) : [12656     4   339   970]
 
 
+Best run on params: criterion='entropy', max_depth=11, min_samples_leaf=10:
+trainAcc : 0.9684577452814147
+trainAuc : 0.9973250821332844
+testAcc : 0.955401245615291
+testAuc : 0.9786640451627285
+train_precision : 1.0
+test_precision : 0.9841688654353562
+train_recall : 0.846964801904438
+test_recall : 0.825830258302583
+train_(tn, fp, fn, tp) : [29405     0  4500 24905]
+test_(tn, fp, fn, tp) : [12596    18   236  1119]
+
+
 TN = True Negative = Licit transaction classified as Licit
 
 FP = False Positive = Illicit transaction classified as Licit

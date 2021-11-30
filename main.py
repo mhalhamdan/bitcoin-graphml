@@ -1,7 +1,8 @@
 from matplotlib.pyplot import axis
 from sklearn import model_selection
 from sklearn import neighbors
-from preprocessing import get_high_correlation, holdout, find_corr, get_high_correlation
+from pca import apply_PCA, normalize_data
+from preprocessing import get_high_correlation, holdout, find_corr, get_high_correlation, upsample_data
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import GridSearchCV
@@ -78,7 +79,7 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
     # Decision tree
     elif model_name == "dt":
         if grid_search:
-            parameters = {"max_depth":[1,3,5,7,9,11], 'min_samples_leaf':[2,10,50,100,150,200,250,300], "criterion":['gini', 'entropy']}
+            parameters = {"max_depth":[1,3,5,7,9,11], 'min_samples_leaf':[2,10,50,100,150], "criterion":['gini', 'entropy']}
             model = GridSearchCV(
                 DecisionTreeClassifier(), 
                 parameters
@@ -89,12 +90,11 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
             model = DecisionTreeClassifier(criterion='entropy', max_depth=11, min_samples_leaf=10)
 
         model.fit(xTrain, yTrain['class'])
-        print("DecisionTree best params: ", model.best_params_)
 
     # Gradient Descent Boosted Decision Tree (GDBDT)
     elif model_name == "GDBDT":
         if grid_search:
-            parameters = {}
+            parameters = {"learning_rate": [0.00001, 0.000001, 0.0000001], "max_depth": [6, 10]}
             model = GridSearchCV(
                 GradientBoostingClassifier(), 
                 parameters
@@ -114,32 +114,47 @@ def train(xTrain, yTrain, model_name="knn", grid_search=False):
 
 
 def main():
-    model_name = "GDBDT"
+    model_name = "dt"
     print("Model: ", model_name)
     # Read data
     print("Reading data...")
     y = pd.read_csv("filtered_classes.csv")
     xFeat = pd.read_csv("filtered_features.csv")
+    print("Done!")
 
-    # Find correlation matrix
-    feature_matrix, label_matrix = find_corr(xFeat, y, plot_title=False)
+    CORRELATION = False
+    if CORRELATION:
+        # Find correlation matrix
+        feature_matrix, label_matrix = find_corr(xFeat, y, plot_title=False)
+        
+        # Threshold for cutting out a correlation 
+        to_remove = get_high_correlation(feature_matrix,THRESHOLD=0.95)
+
+        # Drop based on correlation
+        xFeat.drop(to_remove, axis=1, inplace=True)
+
+        # Get correlation after dropping
+        _, _ = find_corr(xFeat, y.drop(["txId"], axis=1), plot_title="Correlation Matrix for Bitcoin dataset")
+
     
-    # Threshold for cutting out a correlation 
-    to_remove = get_high_correlation(feature_matrix,THRESHOLD=0.95)
-
-    # Drop based on correlation
-    xFeat.drop(to_remove, axis=1, inplace=True)
-
-    # Get correlation after dropping
-    _, _ = find_corr(xFeat, y.drop(["txId"], axis=1), plot_title="Correlation Matrix for Bitcoin dataset")
-
     # Split data, train = 70%, test 30%
     xTrain, xTest, yTrain, yTest = holdout(xFeat, y, 0.7)
 
-    # model_name = "knn"
+    # Upsample data
+    xTrain, yTrain = upsample_data(xTrain, yTrain)
 
+    PCA = False
+    if PCA:
+        # PCA
+        xTrain, xTest = normalize_data(xTrain, xTest)
+        pca = apply_PCA(160, xTrain)
+        xTrain = pca.transform(xTrain)
+        xTest = pca.transform(xTest)
+    
+    print("Training...")
     # Initialize and train model
     model = train(xTrain, yTrain, model_name, grid_search=False)
+    print("Done!")
 
     try:
         print(f"{model_name} best params: {model.best_params_}")
@@ -148,6 +163,7 @@ def main():
 
     print("Predicting...")
     results = predict(model, xTrain, yTrain, xTest, yTest)
+    print("Done!")
 
     for key, value in results.items():
         print(f"{key} : {value}")

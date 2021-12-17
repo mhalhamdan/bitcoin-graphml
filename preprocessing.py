@@ -4,24 +4,29 @@ from numpy.random import permutation
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.utils import resample
+from imblearn.over_sampling import SMOTE
+def minority_only(X, y):
+
+    df = pd.concat([X, y['class']], axis=1, join='inner')
+
+    df_minority = df[df['class'] == 1]
+
+    return df_minority.drop(['class'], axis=1), df_minority[['txId', 'class']]
+
+def upsample_SMOTE(X, y):
+    oversample = SMOTE()
+    X, y = oversample.fit_resample(X, y['class'])
+
+    y = pd.DataFrame(y, columns=["class"])
+
+    return X, y
 
 def upsample_data(X, y):
 
     df = pd.concat([X, y['class']], axis=1, join='inner')
 
-    print(df.shape)
-
     df_majority = df[df['class'] == 0]
     df_minority = df[df['class'] == 1]
-
-    print(df_majority.shape)
-
-    print(df_minority.shape)
-
-    print(df_majority.shape[0])
-
-    # print(df_minority.head())
-    # print(df_majority.head())
 
     df_minority_upsampled = resample(df_minority, 
                                      replace=True, 
@@ -42,7 +47,7 @@ def find_corr(xFeat, y, plot_title=False):
     if plot_title:
         ax = sns.heatmap(label_matrix.abs(), xticklabels=True, yticklabels=True)
         plt.title(plot_title)
-        # plt.show()
+        plt.show()
 
     return feature_matrix.abs(), label_matrix.abs()
 

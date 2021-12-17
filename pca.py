@@ -11,9 +11,9 @@ def normalize_data(xTrain, xTest):
     testScaled = stdScale.transform(xTest)
     return trainScaled, testScaled
 
-def apply_PCA(n_components, xFeat):
+def apply_PCA(n_components, xFeat, y):
     b_pca = PCA(n_components=n_components)
-    b_pca.fit_transform(xFeat)
+    b_pca.fit_transform(xFeat, y['class'])
     return b_pca
 
 def sum_variances(variances):
@@ -32,7 +32,7 @@ def main():
     # iterate through various n components
     n_components = [167, 150, 125, 100, 75, 50, 25, 15, 10, 5, 1]
     for n_component in n_components:
-        n_PCA = apply_PCA(n_components=n_component, xFeat=xTrain).explained_variance_ratio_
+        n_PCA = apply_PCA(n_components=n_component, xFeat=xTrain, y=yTrain).explained_variance_ratio_
         n_sum = sum_variances(n_PCA)
         print("  N components: ", n_component, " Sum: ", n_sum)
 
